@@ -1,0 +1,73 @@
+	Setting Up game Area
+	1. Main node
+	2. Static body node (ground)
+		a. Collision 3d body w shape Boxshape3D
+		b. Give its dimensions
+	3. Collision body is see through need to modify 'ground' node
+		a. >Meshinstance>BoxMesh= visible box
+
+	4. Grid Snapping - lower ground to see mesh
+	5. Directional light node, rotate to light
+
+	Player Scene, Input Actions, Movement
+	1. NewScene>PlayerCharacter>Name>Node3D>drag .glb file on
+	2. CollisionShape3d + SphereShape3d (As with all kinds of physics nodes, we need a collision shape for our character to collide with) 
+	3. Size and position
+
+	Input Actions
+	1. Input Map , Project>Project Settings>Input Map> add actions + Map buttons
+
+	Moving the player with Code
+	1. Attach script to player node
+		extends CharacterBody3D
+		
+		# How fast the player moves in meters per second.
+		@export var speed = 14
+		# The downward acceleration when in the air, in meters per second squared.
+		@export var fall_acceleration = 75
+		
+		var target_velocity = Vector3.ZERO
+		
+		
+		func _physics_process(delta):
+			var direction = Vector3.ZERO
+		
+			if Input.is_action_pressed("move_right"):
+				direction.x += 1
+			if Input.is_action_pressed("move_left"):
+				direction.x -= 1
+			if Input.is_action_pressed("move_back"):
+				direction.z += 1
+			if Input.is_action_pressed("move_forward"):
+				direction.z -= 1
+		
+			if direction != Vector3.ZERO:
+				direction = direction.normalized()
+				$Pivot.basis = Basis.looking_at(direction)
+		
+			# Ground Velocity
+			target_velocity.x = direction.x * speed
+			target_velocity.z = direction.z * speed
+		
+			# Vertical Velocity
+			if not is_on_floor(): # If in the air, fall towards the floor. Literally gravity
+				target_velocity.y = target_velocity.y - (fall_acceleration * delta)
+		
+			# Moving the Character
+			velocity = target_velocity
+			move_and_slide()
+		2. Instantiate and add camera, need camera for 3d
+			i. Marker3D, Camera3D move and rotate, perspective setting
+
+		Adding mob
+	1. VisibleOnScreenNotifier3D - node that deletes off screen objects
+	Add a child node Path3D, cyclinders, close path
+	PathFollow3D
+	
+	Add mob.tscn to main:
+	Export variable in main.gd
+	
+	@export var mob_scene: PackedScene
+	Drag mob.tscn to property on inspector tab
+	
+Timer, Use signals to randomly initialize monsters
